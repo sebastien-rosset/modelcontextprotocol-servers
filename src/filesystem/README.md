@@ -7,7 +7,8 @@ Node.js server implementing Model Context Protocol (MCP) for filesystem operatio
 - Read/write files
 - Create/list/delete directories
 - Move files/directories
-- Search files
+- Search for files by name
+- Search within file contents (grep-like functionality)
 - Get file metadata
 - Dynamic directory access control via [Roots](https://modelcontextprotocol.io/docs/learn/client-concepts#roots)
 
@@ -144,14 +145,28 @@ The server's directory access control follows this flow:
     - `destination` (string)
   - Fails if destination exists
 
-- **search_files**
+- **search_files_by_name**
   - Recursively search for files/directories that match or do not match patterns
   - Inputs:
     - `path` (string): Starting directory
-    - `pattern` (string): Search pattern
+    - `pattern` (string): Name pattern to match
     - `excludePatterns` (string[]): Exclude any patterns.
   - Glob-style pattern matching
-  - Returns full paths to matches
+  - Case-insensitive matching
+  - Returns full paths to matching files/directories
+
+- **search_file_contents**
+  - Search for text patterns within file contents (similar to grep)
+  - Inputs:
+    - `path` (string): Starting directory or specific file
+    - `searchText` (string): Text to search for - supports plain text substring matching or regex if useRegex is true
+    - `useRegex` (boolean): Whether to interpret searchText as a regular expression (default: false)
+    - `caseSensitive` (boolean): Enable case-sensitive search (default: false)
+    - `maxResults` (number): Maximum number of results to return (default: 100)
+    - `contextLines` (number): Number of context lines to show around matches (default: 2)
+    - `includePatterns` (string[]): Glob patterns for paths to include in search (e.g., ["**/*.js", "**/*.ts"])
+    - `excludePatterns` (string[]): Glob patterns for paths to exclude from search (e.g., ["node_modules/**", "*.test.ts"])
+  - Returns matching files with line numbers, matched text, and context
 
 - **directory_tree**
   - Get recursive JSON tree structure of directory contents
